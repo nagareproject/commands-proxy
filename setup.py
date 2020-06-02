@@ -40,6 +40,7 @@ setup(
 
         [nagare.commands.proxy]
         nginx = nagare.admin.nginx_proxy:Proxy
+        apache = nagare.admin.apache_proxy:Proxy
 
         [nagare.services]
         http_proxy = nagare.admin.proxy:HTTPProxyService
