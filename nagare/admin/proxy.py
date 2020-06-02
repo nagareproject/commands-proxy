@@ -28,7 +28,7 @@ class HTTPProxyService(plugin.Plugin):
     def __init__(self, name, dist, server, services_service, **locations):
         services_service(super(HTTPProxyService, self).__init__, name, dist, server=server, **locations)
 
-        self.server = {v for v, activated in server.items() if activated}
+        self.server = [v for v, activated in server.items() if activated]
         self.locations = locations
         self.endpoint = (False, '', '')
 
@@ -41,10 +41,10 @@ class HTTPProxyService(plugin.Plugin):
 
     @staticmethod
     def merge_directives(directives, default_directives):
-        directives_on = {v for v, activated in directives.items() if activated}
+        directives_on = [v for v, activated in directives.items() if activated]
         directives_off = {v for v, activated in directives.items() if not activated}
 
-        return (default_directives - directives_off) | directives_on
+        return [directive for directive in default_directives if directive not in directives_off] + directives_on
 
     def get_server_directives(self, default_directives):
         return self.merge_directives(self.server, default_directives)

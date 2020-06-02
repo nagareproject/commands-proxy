@@ -13,21 +13,21 @@ from nagare.admin import command
 class Proxy(command.Command):
     DESC = 'Nginx reverse proxy dispatch rules generation'
     WITH_STARTED_SERVICES = True
-    DEFAULT_PROXY_DIRECTIVES = {
+    DEFAULT_PROXY_DIRECTIVES = [
         'proxy_set_header Host $host',
         'proxy_set_header X-Forwarded-Proto $scheme',
         'proxy_set_header X-Forwarded-Port $server_port',
         'proxy_redirect off'
-    }
-    DEFAULT_WEBSOCKET_DIRECTIVES = DEFAULT_PROXY_DIRECTIVES | {
+    ]
+    DEFAULT_WEBSOCKET_DIRECTIVES = DEFAULT_PROXY_DIRECTIVES + [
         'proxy_http_version 1.1',
         'proxy_set_header Upgrade $http_upgrade',
         'proxy_set_header Connection "Upgrade"'
-    }
+    ]
 
     @staticmethod
     def generate_directives(directives):
-        return (directive + ';' for directive in sorted(directives))
+        return (directive + ';' for directive in directives)
 
     def generate_location_directives(self, proxy_service, location, default_location_directives):
         location_directives = proxy_service.get_location_directives(location, default_location_directives)
@@ -38,9 +38,9 @@ class Proxy(command.Command):
         yield '}\n'
 
     def generate_dir_directives(self, proxy_service, location, dirname, gzip):
-        default_dir_directives = {'alias {}/'.format(dirname)}
+        default_dir_directives = ['alias {}/'.format(dirname)]
         if gzip:
-            default_dir_directives.add('gzip_static on')
+            default_dir_directives.append('gzip_static on')
 
         for directive in self.generate_location_directives(proxy_service, location, default_dir_directives):
             yield directive
@@ -56,7 +56,7 @@ class Proxy(command.Command):
         for directive in self.generate_location_directives(
             proxy_service,
             location,
-            default_directives | {proxy_directive}
+            default_directives + [proxy_directive]
         ):
             yield directive
 
