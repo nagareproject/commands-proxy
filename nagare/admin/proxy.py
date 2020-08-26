@@ -17,12 +17,8 @@ class Commands(command.Commands):
 
 class HTTPProxyService(plugin.Plugin):
     CONFIG_SPEC = {
-        'server': {
-            '__many__': 'boolean'
-        },
-        '__many__': {
-            '__many__': 'boolean'
-        }
+        'server': {'__many__': 'boolean'},
+        '__many__': {'__many__': 'boolean'}
     }
 
     def __init__(self, name, dist, server, services_service, **locations):
@@ -56,7 +52,7 @@ class HTTPProxyService(plugin.Plugin):
         if reloader_service is not None:
             services_service(reloader_service.start, None)
 
-        print('\n'.join(services_service(proxy.generate_directives, self.server)))
+        print('\n'.join(proxy.generate_directives(self.server)))
         if self.server:
             print()
 
@@ -66,4 +62,4 @@ class HTTPProxyService(plugin.Plugin):
 
         for location, directives in list(self.locations.items()):
             directives = {v for v, activated in directives.items() if activated}
-            print('\n'.join(services_service(proxy.generate_location_directives, location, directives)))
+            print('\n'.join(proxy.generate_location_directives(self, location, directives)))

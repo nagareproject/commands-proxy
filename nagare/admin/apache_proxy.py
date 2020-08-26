@@ -42,7 +42,11 @@ class Proxy(command.Command):
                 r'RewriteRule "\.css\.gz" "-" [T=text/css]'
             ]
 
-        for directive in self.generate_location_directives(proxy_service, location, self.DEFAULT_LOCATION_DIRECTIVE + directives):
+        for directive in self.generate_location_directives(
+            proxy_service,
+            location,
+            self.DEFAULT_LOCATION_DIRECTIVE + directives
+        ):
             yield directive
 
     def generate_proxy_pass_directives(self, proxy_service, location, protocol, url=None):
