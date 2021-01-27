@@ -16,10 +16,11 @@ class Commands(command.Commands):
 
 
 class HTTPProxyService(plugin.Plugin):
-    CONFIG_SPEC = {
-        'server': {'__many__': 'boolean'},
-        '__many__': {'__many__': 'boolean'}
-    }
+    CONFIG_SPEC = dict(
+        plugin.Plugin.CONFIG_SPEC,
+        server={'__many__': 'boolean'},
+        __many__={'__many__': 'boolean'}
+    )
 
     def __init__(self, name, dist, server, services_service, **locations):
         services_service(super(HTTPProxyService, self).__init__, name, dist, server=server, **locations)
