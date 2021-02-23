@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2020 Net-ng.
+# Copyright (c) 2008-2021 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -12,7 +12,7 @@ from nagare.services import plugin
 
 
 class Commands(command.Commands):
-    DESC = 'HTTP reverse proxy dispatch rules generation'
+    DESC = 'HTTP reverse proxy dispatch rules generation subcommands'
 
 
 class HTTPProxyService(plugin.Plugin):
