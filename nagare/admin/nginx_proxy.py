@@ -60,8 +60,8 @@ class Proxy(command.Command):
         ):
             yield directive
 
-    def generate_app_directives(self, proxy_service, location):
-        for directive in self.generate_proxy_pass_directives(proxy_service, location, self.DEFAULT_PROXY_DIRECTIVES):
+    def generate_app_directives(self, proxy_service, location, url=None):
+        for directive in self.generate_proxy_pass_directives(proxy_service, location, self.DEFAULT_PROXY_DIRECTIVES, url):
             yield directive
 
     def generate_ws_directives(self, proxy_service, location):

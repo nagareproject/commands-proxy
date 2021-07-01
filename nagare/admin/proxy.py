@@ -18,8 +18,8 @@ class Commands(command.Commands):
 class HTTPProxyService(plugin.Plugin):
     CONFIG_SPEC = dict(
         plugin.Plugin.CONFIG_SPEC,
-        server={'__many__': 'boolean'},
-        __many__={'__many__': 'boolean'}
+        server={'___many___': 'boolean'},
+        __many__={'___many___': 'boolean'}
     )
 
     def __init__(self, name, dist, server, services_service, **locations):
