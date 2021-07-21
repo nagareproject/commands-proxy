@@ -55,11 +55,11 @@ class HTTPProxyService(plugin.Plugin):
 
         print('\n'.join(proxy.generate_directives(self.server)))
         if self.server:
-            print()
+            print('')
 
         print('\n'.join(statics_service.generate_proxy_directives(self, proxy)))
         if self.locations:
-            print()
+            print('')
 
         for location, directives in list(self.locations.items()):
             directives = {v for v, activated in directives.items() if activated}
