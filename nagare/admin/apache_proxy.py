@@ -13,24 +13,27 @@ from nagare.admin import command
 class Proxy(command.Command):
     DESC = 'Apache reverse proxy dispatch rules generation'
     WITH_STARTED_SERVICES = True
+    DEFAULT_DIRECTIVES = []
     DEFAULT_LOCATION_DIRECTIVE = ['Require all granted']
-    DEFAULT_PROXY_DIRECTIVES = ['RequestHeader set X-Forwarded-Proto expr=%{REQUEST_SCHEME}']
+    DEFAULT_PROXY_DIRECTIVES = ['ProxyPass /static !', 'RequestHeader set X-Forwarded-Proto expr=%{REQUEST_SCHEME}']
 
     @staticmethod
     def generate_directives(directives):
         return directives
 
+    def generate_server_directives(self, proxy_service, directives):
+        return self.generate_directives(proxy_service.merge_directives(directives, self.DEFAULT_DIRECTIVES))
+
     def generate_location_directives(self, proxy_service, location, default_location_directives):
         location_directives = proxy_service.get_location_directives(location, default_location_directives)
 
-        yield '<Location "{}">'.format(location)
-        for directive in self.generate_directives(location_directives):
-            yield '    ' + directive
-        yield '</Location>\n'
+        if location_directives is not None:
+            yield '<Location "{}">'.format(location or '/')
+            for directive in self.generate_directives(location_directives):
+                yield '    ' + directive
+            yield '</Location>\n'
 
     def generate_dir_directives(self, proxy_service, location, dirname, gzip):
-        yield 'Alias "{}" "{}"'.format(location, dirname)
-
         directives = []
         if gzip:
             directives += [
@@ -42,16 +45,22 @@ class Proxy(command.Command):
                 r'RewriteRule "\.css\.gz" "-" [T=text/css]'
             ]
 
-        for directive in self.generate_location_directives(
+        location_directives = list(self.generate_location_directives(
             proxy_service,
             location,
             self.DEFAULT_LOCATION_DIRECTIVE + directives
-        ):
-            yield directive
+        ))
+
+        if location_directives:
+            yield 'Alias "{}" "{}"'.format(location, dirname)
+
+            for directive in location_directives:
+                yield directive
 
     def generate_proxy_pass_directives(self, proxy_service, location, protocol, url=None):
         is_socket, ssl, endpoint, app_url = proxy_service.endpoint
-        proxy_directive = 'ProxyPass "{}{}{}://{}{}"'.format(
+        proxy_directive = 'ProxyPass {} "{}{}{}://{}{}"'.format(
+            url or app_url or '/',
             (endpoint + '|') if is_socket else '',
             protocol,
             's' if ssl else '',
@@ -59,15 +68,19 @@ class Proxy(command.Command):
             url or app_url
         )
 
-        for directive in self.generate_location_directives(
-            proxy_service,
+        location_directives = proxy_service.get_location_directives(
             location,
             self.DEFAULT_PROXY_DIRECTIVES + [proxy_directive]
-        ):
-            yield directive
+        )
 
-    def generate_app_directives(self, proxy_service, location):
-        for directive in self.generate_proxy_pass_directives(proxy_service, location, 'http'):
+        if location_directives is not None:
+            for directive in location_directives:
+                yield directive
+
+            yield ''
+
+    def generate_app_directives(self, proxy_service, location, url=None):
+        for directive in self.generate_proxy_pass_directives(proxy_service, location, 'http', url):
             yield directive
 
     def generate_ws_directives(self, proxy_service, location):

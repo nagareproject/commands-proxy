@@ -13,6 +13,7 @@ from nagare.admin import command
 class Proxy(command.Command):
     DESC = 'Nginx reverse proxy dispatch rules generation'
     WITH_STARTED_SERVICES = True
+    DEFAULT_DIRECTIVES = {}
     DEFAULT_PROXY_DIRECTIVES = [
         'proxy_set_header Host $host',
         'proxy_set_header X-Forwarded-Proto $scheme',
@@ -29,13 +30,17 @@ class Proxy(command.Command):
     def generate_directives(directives):
         return (directive + ';' for directive in directives)
 
+    def generate_server_directives(self, proxy_service, directives):
+        return self.generate_directives(proxy_service.merge_directives(directives, self.DEFAULT_DIRECTIVES))
+
     def generate_location_directives(self, proxy_service, location, default_location_directives):
         location_directives = proxy_service.get_location_directives(location, default_location_directives)
 
-        yield 'location {}/ {{'.format(location)
-        for directive in self.generate_directives(location_directives):
-            yield '    ' + directive
-        yield '}\n'
+        if location_directives:
+            yield 'location {} {{'.format(location)
+            for directive in self.generate_directives(location_directives):
+                yield '    ' + directive
+            yield '}\n'
 
     def generate_dir_directives(self, proxy_service, location, dirname, gzip):
         default_dir_directives = ['alias {}/'.format(dirname)]
@@ -47,7 +52,7 @@ class Proxy(command.Command):
 
     def generate_proxy_pass_directives(self, proxy_service, location, default_directives, url=None):
         is_socket, ssl, endpoint, app_url = proxy_service.endpoint
-        proxy_directive = 'proxy_pass http{}://{}{}{}/'.format(
+        proxy_directive = 'proxy_pass http{}://{}{}{}'.format(
             's' if ssl else '',
             endpoint, ':' if is_socket else '',
             url or app_url
