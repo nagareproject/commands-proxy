@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -18,11 +18,7 @@ class Commands(command.Commands):
 
 
 class HTTPProxyService(plugin.Plugin):
-    CONFIG_SPEC = dict(
-        plugin.Plugin.CONFIG_SPEC,
-        ___many___='boolean',
-        __many__={'___many___': 'boolean'}
-    )
+    CONFIG_SPEC = dict(plugin.Plugin.CONFIG_SPEC, ___many___='boolean', __many__={'___many___': 'boolean'})
 
     def __init__(self, name, dist, services_service, **directives):
         proxy_directives = {
@@ -30,24 +26,18 @@ class HTTPProxyService(plugin.Plugin):
         }
 
         self.directives = {
-            directive: value
-            for directive, value
-            in proxy_directives.items()
-            if not isinstance(value, dict)
+            directive: value for directive, value in proxy_directives.items() if not isinstance(value, dict)
         }
 
         self.locations = {
             re.sub('//+', '/', location).rstrip('/') or '/': values
-            for location, values
-            in proxy_directives.items()
+            for location, values in proxy_directives.items()
             if isinstance(values, dict)
         }
         self.endpoint = (False, '', '')
 
         plugin_config = {
-            directive: directives[directive]
-            for directive in plugin.Plugin.CONFIG_SPEC
-            if directive in directives
+            directive: directives[directive] for directive in plugin.Plugin.CONFIG_SPEC if directive in directives
         }
         plugin_config.update(self.directives)
         plugin_config.update(self.locations)
@@ -63,7 +53,9 @@ class HTTPProxyService(plugin.Plugin):
 
     @staticmethod
     def merge_directives(directives, default_directives):
-        directives_on = {directive for directive, activated in directives.items() if activated} - set(default_directives)
+        directives_on = {directive for directive, activated in directives.items() if activated} - set(
+            default_directives
+        )
         directives_off = {directive for directive, activated in directives.items() if not activated}
 
         return list(directives_on) + [directive for directive in default_directives if directive not in directives_off]

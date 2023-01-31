@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -42,14 +42,12 @@ class Proxy(command.Command):
                 'RewriteCond %{REQUEST_FILENAME}.gz -f',
                 r'RewriteRule ^(.*\.(css|js))$ $1.gz [QSA,L]',
                 r'RewriteRule "\.js\.gz" "-" [T=text/javascript]',
-                r'RewriteRule "\.css\.gz" "-" [T=text/css]'
+                r'RewriteRule "\.css\.gz" "-" [T=text/css]',
             ]
 
-        location_directives = list(self.generate_location_directives(
-            proxy_service,
-            location,
-            self.DEFAULT_LOCATION_DIRECTIVE + directives
-        ))
+        location_directives = list(
+            self.generate_location_directives(proxy_service, location, self.DEFAULT_LOCATION_DIRECTIVE + directives)
+        )
 
         if location_directives:
             yield 'Alias "{}" "{}"'.format(location, dirname)
@@ -65,12 +63,11 @@ class Proxy(command.Command):
             protocol,
             's' if ssl else '',
             'localhost' if is_socket else endpoint,
-            url or app_url
+            url or app_url,
         )
 
         location_directives = proxy_service.get_location_directives(
-            location,
-            self.DEFAULT_PROXY_DIRECTIVES + [proxy_directive]
+            location, self.DEFAULT_PROXY_DIRECTIVES + [proxy_directive]
         )
 
         if location_directives is not None:
@@ -88,6 +85,4 @@ class Proxy(command.Command):
             yield directive
 
     def run(self, http_proxy_service, services_service):
-        """
-        """
         services_service(http_proxy_service.generate_directives, self)
