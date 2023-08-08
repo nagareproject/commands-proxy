@@ -42,12 +42,16 @@ class Proxy(command.Command):
                 yield '    ' + directive
             yield '}\n'
 
-    def generate_dir_directives(self, proxy_service, location, dirname, gzip):
-        default_dir_directives = ['alias {}/'.format(dirname)]
+    def generate_file_directives(self, proxy_service, location, filename, gzip):
+        default_dir_directives = ['alias {}'.format(filename)]
         if gzip:
             default_dir_directives.append('gzip_static on')
 
         for directive in self.generate_location_directives(proxy_service, location, default_dir_directives):
+            yield directive
+
+    def generate_dir_directives(self, proxy_service, location, dirname, gzip):
+        for directive in self.generate_file_directives(proxy_service, location, dirname + '/', gzip):
             yield directive
 
     def generate_proxy_pass_directives(self, proxy_service, location, default_directives, url=None):

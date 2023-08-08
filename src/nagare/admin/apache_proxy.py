@@ -33,7 +33,7 @@ class Proxy(command.Command):
                 yield '    ' + directive
             yield '</Location>\n'
 
-    def generate_dir_directives(self, proxy_service, location, dirname, gzip):
+    def generate_file_directives(self, proxy_service, location, filename, gzip):
         directives = []
         if gzip:
             directives += [
@@ -50,10 +50,12 @@ class Proxy(command.Command):
         )
 
         if location_directives:
-            yield 'Alias "{}" "{}"'.format(location, dirname)
+            yield 'Alias "{}" "{}"'.format(location, filename)
 
             for directive in location_directives:
                 yield directive
+
+    generate_dir_directives = generate_file_directives
 
     def generate_proxy_pass_directives(self, proxy_service, location, protocol, url=None):
         is_socket, ssl, endpoint, app_url = proxy_service.endpoint
