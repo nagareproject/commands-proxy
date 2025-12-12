@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -47,12 +47,10 @@ class Proxy(command.Command):
         if gzip:
             default_dir_directives.append('gzip_static on')
 
-        for directive in self.generate_location_directives(proxy_service, location, default_dir_directives):
-            yield directive
+        yield from self.generate_location_directives(proxy_service, location, default_dir_directives)
 
     def generate_dir_directives(self, proxy_service, location, dirname, gzip):
-        for directive in self.generate_file_directives(proxy_service, location, dirname + '/', gzip):
-            yield directive
+        yield from self.generate_file_directives(proxy_service, location, dirname + '/', gzip)
 
     def generate_proxy_pass_directives(self, proxy_service, location, default_directives, url=None):
         is_socket, ssl, endpoint, app_url = proxy_service.endpoint
@@ -60,22 +58,15 @@ class Proxy(command.Command):
             's' if ssl else '', endpoint, ':' if is_socket else '', url or app_url
         )
 
-        for directive in self.generate_location_directives(
-            proxy_service, location, default_directives + [proxy_directive]
-        ):
-            yield directive
+        yield from self.generate_location_directives(proxy_service, location, default_directives + [proxy_directive])
 
     def generate_app_directives(self, proxy_service, location, url=None):
-        for directive in self.generate_proxy_pass_directives(
-            proxy_service, location, self.DEFAULT_PROXY_DIRECTIVES, url
-        ):
-            yield directive
+        yield from self.generate_proxy_pass_directives(proxy_service, location, self.DEFAULT_PROXY_DIRECTIVES, url)
 
     def generate_ws_directives(self, proxy_service, location):
-        for directive in self.generate_proxy_pass_directives(
+        yield from self.generate_proxy_pass_directives(
             proxy_service, location, self.DEFAULT_WEBSOCKET_DIRECTIVES, location
-        ):
-            yield directive
+        )
 
     def run(self, http_proxy_service, services_service):
         services_service(http_proxy_service.generate_directives, self)

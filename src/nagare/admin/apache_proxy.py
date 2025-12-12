@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -50,10 +50,8 @@ class Proxy(command.Command):
         )
 
         if location_directives:
-            yield 'Alias "{}" "{}"'.format(location, filename)
-
-            for directive in location_directives:
-                yield directive
+            yield f'Alias "{location}" "{filename}"'
+            yield from location_directives
 
     generate_dir_directives = generate_file_directives
 
@@ -73,18 +71,14 @@ class Proxy(command.Command):
         )
 
         if location_directives is not None:
-            for directive in location_directives:
-                yield directive
-
+            yield from location_directives
             yield ''
 
     def generate_app_directives(self, proxy_service, location, url=None):
-        for directive in self.generate_proxy_pass_directives(proxy_service, location, 'http', url):
-            yield directive
+        yield from self.generate_proxy_pass_directives(proxy_service, location, 'http', url)
 
     def generate_ws_directives(self, proxy_service, location):
-        for directive in self.generate_proxy_pass_directives(proxy_service, location, 'ws', location):
-            yield directive
+        yield from self.generate_proxy_pass_directives(proxy_service, location, 'ws', location)
 
     def run(self, http_proxy_service, services_service):
         services_service(http_proxy_service.generate_directives, self)

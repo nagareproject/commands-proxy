@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -18,7 +18,7 @@ class Commands(command.Commands):
 
 
 class HTTPProxyService(plugin.Plugin):
-    CONFIG_SPEC = dict(plugin.Plugin.CONFIG_SPEC, ___many___='boolean', __many__={'___many___': 'boolean'})
+    CONFIG_SPEC = plugin.Plugin.CONFIG_SPEC | {'___many___': 'boolean', '__many__': {'___many___': 'boolean'}}
 
     def __init__(self, name, dist, services_service, **directives):
         proxy_directives = {
@@ -42,7 +42,7 @@ class HTTPProxyService(plugin.Plugin):
         plugin_config.update(self.directives)
         plugin_config.update(self.locations)
 
-        services_service(super(HTTPProxyService, self).__init__, name, dist, **plugin_config)
+        services_service(super().__init__, name, dist, **plugin_config)
 
     def handle_start(self, app, publisher_service, application_service):
         publisher = publisher_service.service
